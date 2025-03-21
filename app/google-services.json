@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "135540958590",
+    "project_id": "noted-134",
+    "storage_bucket": "noted-134.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135540958590:android:4886e8c81dfa1e01a2bf2f",
+        "android_client_info": {
+          "package_name": "com.psyluckco.noted"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7h9f_Gjkq7BqM9xfRpZGC1FDbm2X0ynM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
