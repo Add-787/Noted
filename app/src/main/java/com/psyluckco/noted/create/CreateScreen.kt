@@ -7,7 +7,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -16,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -34,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.psyluckco.noted.R
 import com.psyluckco.noted.ui.theme.NotedTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
     onTaskUpdated: () -> Unit,
@@ -46,6 +55,20 @@ fun CreateScreen(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        topBar = {
+                 TopAppBar(
+                     title = { },
+                     navigationIcon = { IconButton(onClick = onBack) {
+                         Icon(
+                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                             contentDescription = "go back"
+                         )
+                     }}
+                 )
+        },
+        floatingActionButton = { FloatingActionButton(onClick = { /*TODO*/ }) {
+            Icon(imageVector = Icons.Filled.Check, contentDescription = "done")
+        }},
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
 

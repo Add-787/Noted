@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -72,4 +73,32 @@ class TasksViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = TasksUiState(isRefreshing = true)
     )
+
+    fun completedTask(task: Task, isDone: Boolean) {
+        viewModelScope.launch {
+            if(isDone) {
+                taskRepository.completeTask(task.id)
+                showSnackbarMessage(R.string.task_completed)
+            } else {
+                taskRepository.activateTask(task.id)
+                showSnackbarMessage(R.string.task_active)
+            }
+        }
+    }
+
+    fun snackbarMessageShown() {
+        _userMessage.value = null
+    }
+
+    private fun showSnackbarMessage(message: Int) {
+        _userMessage.value = message
+    }
+
+    fun refresh() {
+        _isRefreshing.value = true
+        viewModelScope.launch {
+            taskRepository.refresh()
+            _isRefreshing.value = false
+        }
+    }
 }

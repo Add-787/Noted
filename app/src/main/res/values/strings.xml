@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Noted</string>
     <string name="placeholder">Placeholder text</string>
+    <string name="task_completed">Task Completed</string>
+    <string name="task_active">Task Active</string>
 </resources>
