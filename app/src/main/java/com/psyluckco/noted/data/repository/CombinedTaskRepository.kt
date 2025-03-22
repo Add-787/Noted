@@ -2,6 +2,7 @@ package com.psyluckco.noted.data.repository
 
 import com.psyluckco.noted.data.local.TaskDao
 import com.psyluckco.noted.data.model.Task
+import com.psyluckco.noted.data.network.NetworkDataSource
 import com.psyluckco.noted.di.ApplicationScope
 import com.psyluckco.noted.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,6 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class CombinedTaskRepository @Inject constructor(
+    private val networkDataSource: NetworkDataSource,
     private val localDataSource: TaskDao,
     @DefaultDispatcher private val dispatcher: CoroutineDispatcher,
     @ApplicationScope private val scope: CoroutineScope
