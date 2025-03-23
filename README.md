@@ -19,3 +19,11 @@ I have followed the following standard design practices for this project:
   <img src="https://github.com/Add-787/Noted/blob/main/assets/tasks-screen.jpg" width="320" height="600">
   <img src="https://github.com/Add-787/Noted/blob/main/assets/create-screen.jpg" width="320" height="600">
 </div>
+
+## Crash Detection
+<div align="center">
+  <img src="https://github.com/Add-787/Noted/blob/main/assets/ezgif-8f7099a57caddb.gif" width="320" height="600">
+  <img src="https://github.com/Add-787/Noted/blob/main/assets/crashlytics.png" width="600" height="600">
+</div>
+- Crashlytics shows logs when a crash occurs in the app.
+
