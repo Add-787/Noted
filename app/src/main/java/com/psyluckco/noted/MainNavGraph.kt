@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     startDestination: String = NotedDestinations.TASKS_ROUTE,
     navActions: NotedNavigationActions = remember(navController) {
         NotedNavigationActions(navController)
@@ -59,6 +58,14 @@ fun MainNavGraph(
             entry ->
                 val taskId = entry.arguments?.getString(TASK_ID_ARG)
 
+            CreateScreen(
+                onTaskUpdated = {
+                                navActions.navigateToTasks(
+                                    if(taskId == null) R.string.placeholder else R.string.placeholder
+                                )
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
 
 

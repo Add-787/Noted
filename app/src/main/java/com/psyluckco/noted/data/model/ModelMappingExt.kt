@@ -42,3 +42,17 @@ fun NetworkTask.toLocal() = LocalTask(
     description = "",
     isCompleted = completed
 )
+
+@JvmName("networkToLocal")
+fun List<NetworkTask>.toLocal() = map(NetworkTask::toLocal)
+
+// Network to External
+fun NetworkTask.toExternal() = Task(
+    id = id.toString(),
+    title = title,
+    description = "",
+    isCompleted = completed
+)
+
+@JvmName("networkToExternal")
+fun List<NetworkTask>.toExternal() = map(NetworkTask::toExternal)

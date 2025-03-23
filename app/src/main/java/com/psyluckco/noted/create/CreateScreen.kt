@@ -66,7 +66,7 @@ fun CreateScreen(
                      }}
                  )
         },
-        floatingActionButton = { FloatingActionButton(onClick = { /*TODO*/ }) {
+        floatingActionButton = { FloatingActionButton(onClick = onTaskUpdated) {
             Icon(imageVector = Icons.Filled.Check, contentDescription = "done")
         }},
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -127,7 +127,7 @@ fun CreateContent(
                 onValueChange = onTitleChanged,
                 placeholder = {
                     Text(
-                        text = stringResource(id = R.string.placeholder),
+                        text = stringResource(id = R.string.enter_title),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -139,7 +139,7 @@ fun CreateContent(
             OutlinedTextField(
                 value = description,
                 onValueChange = onDescriptionChanged,
-                placeholder = { Text(stringResource(id = R.string.placeholder)) },
+                placeholder = { Text(stringResource(id = R.string.enter_description)) },
                 modifier = Modifier
                     .height(350.dp)
                     .fillMaxWidth(),

@@ -2,14 +2,20 @@ package com.psyluckco.noted.data.repository
 
 import com.psyluckco.noted.data.local.TaskDao
 import com.psyluckco.noted.data.model.Task
+import com.psyluckco.noted.data.model.toExternal
+import com.psyluckco.noted.data.model.toLocal
 import com.psyluckco.noted.data.network.NetworkDataSource
 import com.psyluckco.noted.di.ApplicationScope
 import com.psyluckco.noted.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.uuid.Uuid
 
 @Singleton
 class CombinedTaskRepository @Inject constructor(
@@ -20,54 +26,82 @@ class CombinedTaskRepository @Inject constructor(
 ) : TaskRepository {
 
     override fun getTasksStream(): Flow<List<Task>> {
-        TODO("Not yet implemented")
+        return localDataSource.observeAll().map { tasks ->
+            withContext(dispatcher) {
+                tasks.toExternal()
+            }
+        }
     }
 
     override suspend fun getTasks(forceUpdate: Boolean): List<Task> {
-        TODO("Not yet implemented")
+        if(forceUpdate) {
+            refresh()
+        }
+
+        return withContext(dispatcher) {
+            localDataSource.getAll().toExternal()
+        }
     }
 
     override suspend fun refresh() {
-        TODO("Not yet implemented")
+        withContext(dispatcher) {
+            val remoteTasks = networkDataSource.loadTasks().take(4)
+            localDataSource.deleteAll()
+            localDataSource.upsertAll(remoteTasks.toLocal())
+        }
     }
 
     override fun getTaskStream(taskId: String): Flow<Task?> {
-        TODO("Not yet implemented")
+        return localDataSource.observeById(taskId).map { it.toExternal() }
+
     }
 
     override suspend fun getTask(taskId: String, forceUpdate: Boolean): Task? {
-        TODO("Not yet implemented")
+        if(forceUpdate) {
+            refresh()
+        }
+
+        return localDataSource.getById(taskId)?.toExternal()
     }
 
     override suspend fun refreshTask(taskId: String) {
-        TODO("Not yet implemented")
+        refresh()
     }
 
     override suspend fun createTask(title: String, description: String): String {
-        TODO("Not yet implemented")
+        val task = Task(
+            id = UUID.randomUUID().toString(),
+            title = title,
+            description = description
+        )
+        localDataSource.upsert(task.toLocal())
+        return task.id;
     }
 
     override suspend fun updateTask(taskId: String, title: String, description: String) {
-        TODO("Not yet implemented")
+        val task = getTask(taskId)?.copy(
+            title = title,
+            description = description
+        ) ?: throw Exception("Task (id $taskId) not found")
     }
 
     override suspend fun completeTask(taskId: String) {
-        TODO("Not yet implemented")
+        localDataSource.updateCompleted(taskId, completed = true)
     }
 
     override suspend fun activateTask(taskId: String) {
-        TODO("Not yet implemented")
+        localDataSource.updateCompleted(taskId, completed = false)
     }
 
     override suspend fun clearCompletedTasks() {
-        TODO("Not yet implemented")
+        localDataSource.deleteCompleted()
     }
 
     override suspend fun deleteAllTasks() {
-        TODO("Not yet implemented")
+        localDataSource.deleteAll()
     }
 
     override suspend fun deleteTask(taskId: String) {
-        TODO("Not yet implemented")
+        localDataSource.deleteById(taskId)
     }
 }

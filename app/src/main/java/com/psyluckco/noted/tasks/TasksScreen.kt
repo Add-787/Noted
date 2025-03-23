@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Add
@@ -72,7 +73,11 @@ fun TasksScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
         floatingActionButton = {
-            FloatingActionButton(onClick = onTaskAdded) {
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.primary,
+                onClick = onTaskAdded,
+                shape = CircleShape
+            ) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = "add task")
             }
         }

@@ -49,6 +49,12 @@ class TasksViewModel @Inject constructor(
         .map { Async.Success(it) }
         .catch<Async<List<Task>>> { emit(Async.Error(R.string.placeholder)) }
 
+
+    init {
+        viewModelScope.launch {
+            taskRepository.refresh()
+        }
+    }
     val uiState: StateFlow<TasksUiState> = combine(
         _isRefreshing,_userMessage,_tasks
     ) {

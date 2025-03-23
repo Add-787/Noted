@@ -3,4 +3,6 @@
     <string name="placeholder">Placeholder text</string>
     <string name="task_completed">Task Completed</string>
     <string name="task_active">Task Active</string>
+    <string name="enter_title">Enter title</string>
+    <string name="enter_description">Enter description</string>
 </resources>
