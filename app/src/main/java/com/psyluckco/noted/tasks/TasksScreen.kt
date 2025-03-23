@@ -20,15 +20,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,15 +41,20 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,6 +81,16 @@ fun TasksScreen(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
+//        topBar = {
+//                 TopAppBar(
+//                     title = { },
+//                     actions = {
+//                         IconButton(onClick = viewModel::forceCrash) {
+//                             Icon(imageVector = Icons.Outlined.Build, contentDescription = "force crash")
+//                         }
+//                     }
+//                 )
+//        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
         floatingActionButton = {
             FloatingActionButton(
@@ -89,8 +109,9 @@ fun TasksScreen(
             TasksContent(
                 isRefreshing = uiState.isRefreshing,
                 tasks = uiState.tasks,
-                onRefresh = { },
-                onTaskCheckedChange = { _,_ -> },
+                onRefresh = viewModel::refresh,
+                onAppCrashed = viewModel::forceCrash,
+                onTaskCheckedChange = viewModel::completedTask,
                 onTaskClick = onTaskClicked,
                 modifier = Modifier.padding(paddingValues)
             )
@@ -105,22 +126,27 @@ fun TasksScreen(
 fun TasksContent(
     isRefreshing: Boolean,
     tasks: List<Task>,
-    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     onRefresh: () -> Unit,
+    onAppCrashed: () -> Unit,
     onTaskClick: (Task) -> Unit,
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = onRefresh, state = pullToRefreshState) {
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
         if(tasks.isEmpty()) {
             NoTasksContent()
         } else {
             Column(
-                modifier = modifier.padding(horizontal = 18.dp, vertical = 4.dp)
+                modifier = modifier
+                    .padding(horizontal = 18.dp, vertical = 4.dp)
             ) {
-                StatusBox(noOfCompletedTasks = tasks.filter { t -> t.isCompleted }.size, totalNoOfTasks = tasks.size)
+                StatusBox(noOfCompletedTasks = tasks.filter { t -> t.isCompleted }.size, onAppCrashed = onAppCrashed,totalNoOfTasks = tasks.size)
                 Spacer(modifier = Modifier.height(24.dp))
-                TasksList(tasks = tasks, onTaskClick = onTaskClick, onTaskCheckedChange = onTaskCheckedChange)
+                TasksList(isRefreshing = isRefreshing, onRefresh = onRefresh,tasks = tasks, onTaskClick = onTaskClick, onTaskCheckedChange = onTaskCheckedChange)
             }
         }
     }
@@ -138,6 +164,7 @@ private fun EmptyTasksPreview() {
                 onRefresh = {  },
                 onTaskClick = { },
                 onTaskCheckedChange = { _,_ -> },
+                onAppCrashed = { },
                 modifier = Modifier
             )
         }
@@ -170,6 +197,7 @@ private fun SomeTasksPreview() {
                     )
                 ),
                 onRefresh = { },
+                onAppCrashed = { },
                 onTaskClick = { },
                 onTaskCheckedChange = { _,_ -> }
             )
@@ -205,14 +233,24 @@ fun NoTasksContent() {
 fun StatusBox(
     noOfCompletedTasks: Int,
     totalNoOfTasks: Int,
+    onAppCrashed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column {
-        Text(
-            text = "Status",
-            modifier = Modifier.padding(vertical = 10.dp),
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Status",
+                modifier = Modifier.padding(vertical = 10.dp),
+                style = MaterialTheme.typography.headlineMedium
+            )
+            IconButton(onClick = onAppCrashed) {
+                Icon(imageVector = Icons.Filled.Build, contentDescription = "force crash")
+            }
+
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Card {
             Column(
@@ -243,7 +281,7 @@ fun StatusBox(
 private fun StatusBoxPreview() {
     NotedTheme {
         Surface {
-            StatusBox(noOfCompletedTasks = 5, totalNoOfTasks = 10)
+            StatusBox(noOfCompletedTasks = 5, onAppCrashed = { }, totalNoOfTasks = 10)
         }
     }
 }
@@ -298,8 +336,11 @@ private fun TaskItemPreview() {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksList(
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     tasks: List<Task>,
     onTaskClick: (Task) -> Unit,
     onTaskCheckedChange: (Task,Boolean) -> Unit,
@@ -309,22 +350,24 @@ fun TasksList(
         modifier = modifier.fillMaxSize()
     ) {
         Text(
-            text = "Today's Tasks",
+            text = "Tasks",
             modifier = Modifier.padding(vertical = 10.dp),
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(tasks) { task ->
-                TaskItem(
-                    task = task,
-                    onTaskClick = onTaskClick,
-                    onCheckedChange = { onTaskCheckedChange(task,it) },
-                )
-            }
+        PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = onRefresh) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(tasks) { task ->
+                    TaskItem(
+                        task = task,
+                        onTaskClick = onTaskClick,
+                        onCheckedChange = { onTaskCheckedChange(task,it) },
+                    )
+                }
 
+            }
         }
     }
 

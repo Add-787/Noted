@@ -7,6 +7,12 @@ plugins {
 
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
+
+    // Add the Performance Monitoring Gradle plugin
+    id("com.google.firebase.firebase-perf")
+
+    // Add the Crashlytics Gradle plugin
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -74,6 +80,9 @@ dependencies {
     // Architecture Components
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
     ksp(libs.room.compiler)
 
     // Hilt

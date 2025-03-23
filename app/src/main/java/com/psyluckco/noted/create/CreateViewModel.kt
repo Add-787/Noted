@@ -23,7 +23,9 @@ import javax.inject.Inject
 data class CreateUiState(
     val title: String = "",
     val description: String = "",
+    val isTaskLoaded: Boolean = false,
     val isTaskCompleted: Boolean = false,
+    val isTaskDeleted: Boolean = false,
     val isRefreshing: Boolean = false,
     val userMessage: Int? = null,
     val isTaskSaved: Boolean = false
@@ -92,6 +94,19 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    fun deleteTask() {
+        if(taskId == null) {
+            throw RuntimeException("deleteTask() was called but task is new.")
+        }
+        viewModelScope.launch {
+            taskRepository.deleteTask(taskId)
+
+            _uiState.update {
+                it.copy(isTaskDeleted = true)
+            }
+        }
+    }
+
     private fun updateTask() {
         if (taskId == null) {
             throw RuntimeException("updateTask() was called but task is new.")
@@ -116,13 +131,14 @@ class CreateViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            taskRepository.getTask(taskId).let {
-                if(it != null) {
+            taskRepository.getTask(taskId).let { task ->
+                if(task != null) {
                     _uiState.update {
                         it.copy(
-                            title = it.title,
-                            description = it.description,
-                            isTaskCompleted = it.isTaskCompleted,
+                            title = task.title,
+                            description = task.description,
+                            isTaskLoaded = true,
+                            isTaskCompleted = task.isCompleted,
                             isRefreshing = false
                         )
                     }

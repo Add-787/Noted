@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -27,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,7 @@ import com.psyluckco.noted.ui.theme.NotedTheme
 @Composable
 fun CreateScreen(
     onTaskUpdated: () -> Unit,
+    onTaskDeleted: () -> Unit,
     onBack: () -> Unit,
     viewModel: CreateViewModel = hiltViewModel(),
     snackbarHostState: SnackbarHostState = remember {
@@ -53,6 +56,9 @@ fun CreateScreen(
     },
     modifier: Modifier = Modifier
 ) {
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -63,24 +69,49 @@ fun CreateScreen(
                              imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                              contentDescription = "go back"
                          )
-                     }}
+                     }},
+                     actions = {
+                        if(uiState.isTaskLoaded) {
+                            IconButton(onClick = viewModel::deleteTask) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "delete task"
+                                )
+                            }
+                        }
+
+                     }
                  )
         },
-        floatingActionButton = { FloatingActionButton(onClick = onTaskUpdated) {
+        floatingActionButton = { FloatingActionButton(
+            onClick = viewModel::saveTask,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
             Icon(imageVector = Icons.Filled.Check, contentDescription = "done")
         }},
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
 
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
             CreateContent(
                 isRefreshing = uiState.isRefreshing,
                 title = uiState.title,
+                description = uiState.description,
                 onTitleChanged = viewModel::updateTitle,
                 onDescriptionChanged = viewModel::updateDescription,
                 modifier = modifier.padding(paddingValues)
             )
+
+        LaunchedEffect(uiState.isTaskSaved) {
+            if (uiState.isTaskSaved) {
+                onTaskUpdated()
+            }
+        }
+
+        LaunchedEffect(uiState.isTaskDeleted) {
+            if (uiState.isTaskDeleted) {
+                onTaskDeleted()
+            }
+        }
 
 
     }
@@ -91,7 +122,7 @@ fun CreateScreen(
 fun CreateContent(
     isRefreshing: Boolean,
     title: String = "New Task",
-    description: String = "",
+    description: String = "New Description",
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
     modifier: Modifier = Modifier

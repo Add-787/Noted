@@ -10,6 +10,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.psyluckco.noted.R
+import com.psyluckco.noted.data.firebase.AnalyticsService
 import com.psyluckco.noted.data.model.Task
 import com.psyluckco.noted.data.repository.TaskRepository
 import com.psyluckco.noted.utils.Async
@@ -40,6 +41,7 @@ data class TasksUiState(
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
+    private val analyticsService: AnalyticsService,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -50,11 +52,12 @@ class TasksViewModel @Inject constructor(
         .catch<Async<List<Task>>> { emit(Async.Error(R.string.placeholder)) }
 
 
-    init {
-        viewModelScope.launch {
-            taskRepository.refresh()
-        }
-    }
+//    init {
+//        viewModelScope.launch {
+//            taskRepository.refresh()
+//        }
+//    }
+
     val uiState: StateFlow<TasksUiState> = combine(
         _isRefreshing,_userMessage,_tasks
     ) {
@@ -83,6 +86,7 @@ class TasksViewModel @Inject constructor(
     fun completedTask(task: Task, isDone: Boolean) {
         viewModelScope.launch {
             if(isDone) {
+                analyticsService.logTaskCompletedEvent(task.id)
                 taskRepository.completeTask(task.id)
                 showSnackbarMessage(R.string.task_completed)
             } else {
@@ -90,6 +94,10 @@ class TasksViewModel @Inject constructor(
                 showSnackbarMessage(R.string.task_active)
             }
         }
+    }
+
+    fun forceCrash() {
+        throw RuntimeException("Force test crash.")
     }
 
     fun snackbarMessageShown() {

@@ -64,6 +64,11 @@ fun MainNavGraph(
                                     if(taskId == null) R.string.placeholder else R.string.placeholder
                                 )
                 },
+                onTaskDeleted = {
+                                navActions.navigateToTasks(
+                                    if(taskId == null) R.string.placeholder else R.string.placeholder
+                                )
+                },
                 onBack = { navController.popBackStack() }
             )
         }

@@ -18,6 +18,8 @@ retrofitKotlinxSerializationJson = "0.8.0"
 room = "2.6.1"
 timber = "5.0.1"
 firebase-bom = "32.7.0"
+googleServices = "4.4.2"
+firebaseAnalytics = "22.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +51,9 @@ converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-perf = { module = "com.google.firebase:firebase-perf" }
+google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 
 # Dependencies of the included build-logic
 #android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
