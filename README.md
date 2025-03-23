@@ -41,7 +41,7 @@ I have followed the following standard design practices for this project:
 
 ## Analytics
 - Firebase analytics has been integrated by adding sdk's into the app.
-- An AnayticsService interface was created which was implemented by the FirebaseAnalyticsService class.
+- An AnalyticsService interface was created which was implemented by the FirebaseAnalyticsService class.
 - Methods to log adding, editing and completing of tasks were implemented.
 - Changes take a day to be reflected in the firebase console.
 
